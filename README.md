@@ -181,9 +181,3 @@ These defaults are the configuration behind every number reported in the paper.
 Model selection keeps the best state by *training* CFM loss (checked every 50 epochs);
 the evaluation split is never used for selection.
 
-## Anonymity
-
-All identifying information has been removed. We will release the complete training,
-evaluation, and analysis code — baselines, forecasting and generation experiments,
-calibration, multi-seed and timing studies, plotting, and pre-trained checkpoints —
-upon acceptance.
