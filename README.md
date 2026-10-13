@@ -4,7 +4,15 @@ Official PyTorch implementation of the NeurIPS 2026 paper.
 
 **Genpei Zhang** · University of Wisconsin–Madison
 
-[[Project page]](https://zgp110.github.io/misspath-fm/) · [[Paper]](https://zgp110.github.io/misspath-fm/static/MissPath-FM_NeurIPS2026.pdf)
+[![NeurIPS 2026](https://img.shields.io/badge/NeurIPS-2026-4b3aa8)](https://zgp110.github.io/misspath-fm/) [![Project Page](https://img.shields.io/badge/Project-Page-5b4bc4)](https://zgp110.github.io/misspath-fm/) [![Paper](https://img.shields.io/badge/Paper-PDF-b31b1b)](https://zgp110.github.io/misspath-fm/static/MissPath-FM_NeurIPS2026.pdf) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+<p align="center">
+  <img src="docs/assets/images/framework.webp" width="100%" alt="MissPath-FM overview">
+</p>
+<p align="center"><em>
+  (1) A structured source prior starts the flow next to the observed signal. (2) A missingness-aware path locks observed
+  entries in early. (3) A context-conditioned Transformer predicts the velocity; inference runs 20 Euler steps.
+</em></p>
 
 This repository contains the MissPath-FM model and the scripts that reproduce its imputation results and component ablations. No pre-trained weights are shipped: every number is reproduced by training from scratch with the scripts below.
 
@@ -15,6 +23,34 @@ Standard conditional flow matching starts from a fixed Gaussian source, so on pa
 1. **Structured source prior** `p_0(z_0 | c)`. Observed values are interpolated along the time axis, and noise is added with a small variance at observed positions and a larger variance over the gaps, so the flow starts next to the observed signal.
 2. **Missingness-aware probability path.** The linear path `x_t = (1 - t) z_0 + t x_1` is replaced by `x_t = (1 - alpha_t) z_0 + alpha_t x_1` with `alpha_t = 1 - (1 - t)^s`, where the speed `s` depends on the mask. Observed entries converge early and missing entries keep the full transport time.
 3. **Context-conditioned velocity network.** A Transformer takes `(x_t, t, mask, time_gaps)` and regresses the conditional target `s (1 - t)^(s - 1) (x_1 - z_0)`, with an additional small consistency penalty on observed positions.
+
+## Results
+
+Four datasets (ETTm1, Electricity, Synthetic, PhysioNet 2012) × four missingness mechanisms (MCAR, block, MNAR, irregular) × two missing rates, against eight baselines (SAITS, BRITS, CSDI, GP-VAE, FlowTS, CLWF, TSFlow, PSW-I) under identical splits and masks.
+
+- **Imputation:** best MAE in **29 / 32** settings at `T = 48`, and **45 / 48** overall including `T ∈ {24, 96}`.
+- **Forecasting** (`h = 24`, clean and 30%-MCAR histories): best in **6 / 6** settings.
+- **Unconditional generation:** best in **8 / 9** metric–dataset combinations, including the best discriminative score on all three datasets.
+- **Ablation:** every component helps in every setting. The source prior gives the largest gain under random missingness, the learned flow is what recovers block gaps, and the missingness-aware path adds a further 12–26%.
+
+<p align="center">
+  <img src="docs/assets/images/imputation_qualitative.webp" width="100%" alt="Qualitative imputation on ETTm1">
+</p>
+<p align="center"><em>
+  Qualitative imputation on ETTm1. (a) MNAR 30%: MissPath-FM recovers masked extreme values. (b) Block 30%: inside the
+  contiguous gap (shaded), TSFlow diverges and BRITS flattens, while MissPath-FM follows the ground truth.
+</em></p>
+
+**Why it works.** With a Gaussian source the velocity field is spread over every entry; with a structured prior the observed entries barely move (up to 15× shorter transport) and the velocity concentrates on the entries that are actually missing.
+
+<p align="center">
+  <img src="docs/assets/images/velocity_field_comparison.webp" width="100%" alt="Velocity field magnitude under three priors">
+</p>
+<p align="center"><em>
+  Velocity magnitude at t = 0.5 on ETTm1 (MCAR 30%) under (a) a Gaussian prior, (b) the interpolation prior, (c) the GP posterior prior.
+</em></p>
+
+Full tables are on the [project page](https://zgp110.github.io/misspath-fm/) and in the [paper](https://zgp110.github.io/misspath-fm/static/MissPath-FM_NeurIPS2026.pdf).
 
 ## Repository layout
 
