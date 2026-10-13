@@ -4,7 +4,7 @@ Official PyTorch implementation of the NeurIPS 2026 paper.
 
 **Genpei Zhang** · University of Wisconsin–Madison
 
-<!-- [[Paper]](add the OpenReview / proceedings link here) -->
+[[Project page]](https://zgp110.github.io/misspath-fm/) · [[Paper]](https://zgp110.github.io/misspath-fm/static/MissPath-FM_NeurIPS2026.pdf)
 
 This repository contains the MissPath-FM model and the scripts that reproduce its imputation results and component ablations. No pre-trained weights are shipped: every number is reproduced by training from scratch with the scripts below.
 
